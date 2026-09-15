@@ -22,6 +22,11 @@ def get_runner():
     return _active
 
 
+def run_circuit(qc, shots=1024):
+    """Run a circuit on the backend chosen in the setup cell."""
+    return get_runner().run(qc, shots=shots)
+
+
 def _activate(runner):
     global _active
     _active = runner
@@ -41,18 +46,7 @@ def setup(use_simulator=True, api_key='', crn=''):
     global _active
     _active = None
     try:
-        return _activate(make_runner(use_simulator, api_key, crn))
+        _activate(make_runner(use_simulator, api_key, crn))
     except ConfigError as exc:
         # make_runner has already printed the specific problems.
         print(exc)
-        return None
-
-
-def use_simulator():
-    """Switch to the local simulator without re-running the setup cell."""
-    return setup(True)
-
-
-def connect(api_key, crn):
-    """Switch to real hardware without re-running the setup cell."""
-    return setup(False, api_key, crn)

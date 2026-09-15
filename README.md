@@ -11,16 +11,21 @@ of inactivity, and nothing you type is saved to this repository or visible to ot
 ## What's in here
 
 ```
-workshop.ipynb              the notebook attendees run
+workshop.ipynb    the workshop — setup cell, then three exercises
 workshop/
-  session.py                remembers the backend the setup cell chose
-  runner.py                 connects and runs circuits
-  examples/
-    coin_flips.py           Example 1 — one qubit in superposition
-    bell_state.py           Example 2 — two entangled qubits
-    shor.py                 Example 3 — factoring 15
-requirements.txt            pinned Python packages
-runtime.txt                 Python version for Binder
+  session.py      remembers the backend the setup cell chose
+  runner.py       connects and runs circuits
+requirements.txt  pinned Python packages
+runtime.txt       Python version for Binder
+```
+
+The circuits live in the notebook itself, where attendees can see and edit them.
+The `workshop/` package only handles the plumbing — picking a backend, validating
+credentials, and running a circuit on whichever one is active:
+
+```python
+from workshop import run_circuit
+counts = run_circuit(qc, shots=1024)
 ```
 
 ## The attendee flow
@@ -39,9 +44,17 @@ One setup cell, then everything else just runs:
 3. Credentials are validated right there. A wrong-length key or a malformed CRN
    is reported in that cell, not three cells later — and a failed setup leaves no
    active backend, so the examples never quietly run somewhere you did not intend.
-4. Run any example. They take no arguments and use whichever backend is active.
+4. Run the exercises. Each one draws its circuit, runs it, and prints the results.
 
-To switch backends mid-session, change the variables and run the setup cell again.
+To switch backends, change the variables and run the setup cell again.
+
+## The exercises
+
+1. **Tilting a qubit** — an `ry` gate sets how likely a `1` is. Attendees pick the
+   probability, see five single measurements come out differently, then measure the
+   same circuit 2000 times and watch the bias they asked for appear.
+2. **Entanglement** — a Bell pair: only `00` and `11`, never `01` or `10`.
+3. **Shor's algorithm** — factoring 15 by quantum period finding.
 
 Each example is a self-contained module with the same shape:
 
@@ -55,25 +68,6 @@ The notebook is a thin wrapper over these — the setup cell chooses a backend, 
 each cell calls `run()` on one example. Edits to the files under `workshop/` are
 picked up by the notebook automatically (it enables `autoreload`), so attendees
 can open a module, change a gate, and re-run the cell.
-
-## Running from a terminal
-
-The examples don't need the notebook:
-
-```bash
-python -m workshop                              # list the examples
-python -m workshop bell_state                   # run one
-python -m workshop --all                        # run all three
-python -m workshop.examples.shor --shots 2048   # per-example options
-```
-
-These default to the local simulator. For real hardware:
-
-```bash
-export USE_SIMULATOR=false
-export IBM_QUANTUM_API_KEY=...          # 44-character key from your dashboard
-export IBM_QUANTUM_CRN=crn:v1:bluemix...
-```
 
 ## For the presenter
 

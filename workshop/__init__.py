@@ -1,24 +1,17 @@
 """IBM Quantum Workshop.
 
-In the notebook, one setup cell picks the backend:
+The notebook's setup cell chooses where circuits run:
 
     from workshop import setup
-    setup()
+    setup(USE_SIMULATOR, API_KEY, CRN)
 
-after which every example runs with no arguments:
+after which the example cells build their own circuits and run them:
 
-    from workshop.examples import bell_state
-    bell_state.run()
-
-Each example is also runnable on its own from a terminal:
-
-    python -m workshop.examples.bell_state
+    from workshop import run_circuit
+    counts = run_circuit(qc, shots=1024)
 """
 
-from .runner import ConfigError, Runner, make_runner, runner_from_env
-from .session import connect, get_runner, setup, use_simulator
+from .runner import ConfigError, Runner, make_runner
+from .session import get_runner, run_circuit, setup
 
-__all__ = [
-    'ConfigError', 'Runner', 'make_runner', 'runner_from_env',
-    'connect', 'get_runner', 'setup', 'use_simulator',
-]
+__all__ = ['ConfigError', 'Runner', 'make_runner', 'get_runner', 'run_circuit', 'setup']

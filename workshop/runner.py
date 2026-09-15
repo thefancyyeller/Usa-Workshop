@@ -1,11 +1,11 @@
 """Backend selection and circuit execution.
 
 One place that knows how to talk to either the local simulator or real IBM
-Quantum hardware, so the example modules don't have to care which is in use.
+Quantum hardware, so the notebook's example cells don't have to care which
+is in use.
 """
 
 import logging
-import os
 import warnings
 from contextlib import contextmanager
 
@@ -79,15 +79,13 @@ def _check_credentials(api_key, crn):
     problems = []
 
     if not api_key:
-        problems.append('API_KEY is empty. Set it in the SETUP cell, or the '
-                        'IBM_QUANTUM_API_KEY environment variable.')
+        problems.append('API_KEY is empty. Paste it into the SETUP cell.')
     elif len(api_key) != API_KEY_LENGTH:
         problems.append(f'API_KEY should be {API_KEY_LENGTH} characters (yours is '
                         f'{len(api_key)}). Copy it again from the dashboard.')
 
     if not crn:
-        problems.append('CRN is empty. Set it in the SETUP cell, or the '
-                        'IBM_QUANTUM_CRN environment variable.')
+        problems.append('CRN is empty. Paste it into the SETUP cell.')
     elif not crn.startswith('crn:'):
         problems.append('CRN should start with "crn:". Copy it from the Instances '
                         'page (hover the CRN, click copy).')
@@ -152,23 +150,3 @@ def make_runner(use_simulator=True, api_key='', crn='', quiet=False):
     if not quiet:
         print('Connected. Running on real hardware:', runner.description)
     return runner
-
-
-def runner_from_env(quiet=False):
-    """Build a Runner from environment variables.
-
-    Used when an example module is run as a script. Defaults to the simulator;
-    set USE_SIMULATOR=false to reach for real hardware.
-
-        USE_SIMULATOR        'false'/'0'/'no' to use real hardware (default: true)
-        IBM_QUANTUM_API_KEY  your 44-character API key
-        IBM_QUANTUM_CRN      your instance CRN
-    """
-    flag = os.environ.get('USE_SIMULATOR', 'true').strip().lower()
-    use_simulator = flag not in ('false', '0', 'no')
-    return make_runner(
-        use_simulator=use_simulator,
-        api_key=os.environ.get('IBM_QUANTUM_API_KEY', ''),
-        crn=os.environ.get('IBM_QUANTUM_CRN', ''),
-        quiet=quiet,
-    )
