@@ -4,12 +4,41 @@ One place that knows how to talk to either the local simulator or real IBM
 Quantum hardware, so the example modules don't have to care which is in use.
 """
 
+import logging
 import os
+import warnings
+from contextlib import contextmanager
 
 from qiskit import transpile
 from qiskit.transpiler import generate_preset_pass_manager
 
 API_KEY_LENGTH = 44
+
+#: Loggers that chat at WARNING level during a perfectly normal connection.
+_NOISY_LOGGERS = ('qiskit', 'qiskit_ibm_runtime', 'qiskit_aer')
+
+
+@contextmanager
+def _quiet_setup():
+    """Hide Qiskit's informational noise while connecting.
+
+    Connecting with a token logs "Loading account with the given token" at
+    WARNING level. Jupyter paints stderr red, so a normal connection looks
+    like a failure. Errors still come through -- only WARNING and below are
+    held back, and only for the duration of the connection.
+    """
+    saved = [(logging.getLogger(name), logging.getLogger(name).level)
+             for name in _NOISY_LOGGERS]
+    for logger, _ in saved:
+        logger.setLevel(logging.ERROR)
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', DeprecationWarning)
+            warnings.simplefilter('ignore', UserWarning)
+            yield
+    finally:
+        for logger, level in saved:
+            logger.setLevel(level)
 
 
 class ConfigError(RuntimeError):
@@ -93,10 +122,11 @@ def make_runner(use_simulator=True, api_key='', crn='', quiet=False):
     use_simulator=False -> least-busy real device on your IBM Quantum instance
     """
     if use_simulator:
-        from qiskit_aer import AerSimulator
-        from qiskit_aer.primitives import SamplerV2 as Sampler
+        with _quiet_setup():
+            from qiskit_aer import AerSimulator
+            from qiskit_aer.primitives import SamplerV2 as Sampler
 
-        runner = Runner(AerSimulator(), Sampler, use_simulator=True)
+            runner = Runner(AerSimulator(), Sampler, use_simulator=True)
         if not quiet:
             print('Ready: local simulator')
         return runner
@@ -107,12 +137,13 @@ def make_runner(use_simulator=True, api_key='', crn='', quiet=False):
     from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2 as Sampler
 
     try:
-        service = QiskitRuntimeService(
-            channel='ibm_quantum_platform',
-            token=api_key,
-            instance=crn,
-        )
-        backend = service.least_busy(operational=True, simulator=False)
+        with _quiet_setup():
+            service = QiskitRuntimeService(
+                channel='ibm_quantum_platform',
+                token=api_key,
+                instance=crn,
+            )
+            backend = service.least_busy(operational=True, simulator=False)
     except Exception as e:
         _explain_connection_failure(e)
         raise ConfigError('Fix the issue above, then try again.') from e
