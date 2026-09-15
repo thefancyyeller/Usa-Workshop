@@ -1,12 +1,14 @@
 """IBM Quantum Workshop.
 
-Typical notebook use:
+In the notebook, one setup cell picks the backend:
 
-    from workshop import make_runner
+    from workshop import setup
+    setup()
+
+after which every example runs with no arguments:
+
     from workshop.examples import bell_state
-
-    runner = make_runner(USE_SIMULATOR, API_KEY, CRN)
-    bell_state.run(runner)
+    bell_state.run()
 
 Each example is also runnable on its own from a terminal:
 
@@ -14,5 +16,9 @@ Each example is also runnable on its own from a terminal:
 """
 
 from .runner import ConfigError, Runner, make_runner, runner_from_env
+from .session import connect, get_runner, setup, use_simulator
 
-__all__ = ['ConfigError', 'Runner', 'make_runner', 'runner_from_env']
+__all__ = [
+    'ConfigError', 'Runner', 'make_runner', 'runner_from_env',
+    'connect', 'get_runner', 'setup', 'use_simulator',
+]

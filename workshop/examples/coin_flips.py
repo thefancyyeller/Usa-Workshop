@@ -11,6 +11,7 @@ import argparse
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 
 from .._cli import runner_or_exit
+from ..session import get_runner
 
 TITLE = 'Hello quantum: five 50/50 qubit measurements'
 
@@ -23,8 +24,12 @@ def build_circuit():
     return qc
 
 
-def run(runner, flips=5):
-    """Flip the quantum coin `flips` times, printing each result."""
+def run(runner=None, flips=5):
+    """Flip the quantum coin `flips` times, printing each result.
+
+    Uses the backend from the setup cell unless you pass one.
+    """
+    runner = runner or get_runner()
     # Note: on real hardware each loop iteration is a separate queued job.
     results = []
     for i in range(flips):

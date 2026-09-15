@@ -12,6 +12,7 @@ import argparse
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 
 from .._cli import runner_or_exit
+from ..session import get_runner
 
 TITLE = 'Bell state: entangled qubits'
 
@@ -25,8 +26,12 @@ def build_circuit():
     return qc
 
 
-def run(runner, shots=1024):
-    """Prepare and measure a Bell pair, printing the outcome counts."""
+def run(runner=None, shots=1024):
+    """Prepare and measure a Bell pair, printing the outcome counts.
+
+    Uses the backend from the setup cell unless you pass one.
+    """
+    runner = runner or get_runner()
     counts = runner.run(build_circuit(), shots=shots)
     print('Counts:', counts)
     return counts

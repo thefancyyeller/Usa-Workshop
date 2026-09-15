@@ -15,6 +15,7 @@ import numpy as np
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 
 from .._cli import runner_or_exit
+from ..session import get_runner
 
 TITLE = "Shor's algorithm: factor 15"
 
@@ -97,8 +98,12 @@ def factors_from_counts(counts, N=15, a=7, n_count=N_COUNT):
     return sorted(factors)
 
 
-def run(runner, N=15, a=7, shots=1024):
-    """Factor N with Shor's algorithm, printing what was measured."""
+def run(runner=None, N=15, a=7, shots=1024):
+    """Factor N with Shor's algorithm, printing what was measured.
+
+    Uses the backend from the setup cell unless you pass one.
+    """
+    runner = runner or get_runner()
     counts = runner.run(build_circuit(a=a), shots=shots)
     print('Measured phases (raw counts):', counts)
 
