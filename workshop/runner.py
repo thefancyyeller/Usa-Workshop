@@ -50,14 +50,14 @@ def _check_credentials(api_key, crn):
     problems = []
 
     if not api_key:
-        problems.append('API_KEY is empty. Set it in the CONFIG cell, or the '
+        problems.append('API_KEY is empty. Set it in the SETUP cell, or the '
                         'IBM_QUANTUM_API_KEY environment variable.')
     elif len(api_key) != API_KEY_LENGTH:
         problems.append(f'API_KEY should be {API_KEY_LENGTH} characters (yours is '
                         f'{len(api_key)}). Copy it again from the dashboard.')
 
     if not crn:
-        problems.append('CRN is empty. Set it in the CONFIG cell, or the '
+        problems.append('CRN is empty. Set it in the SETUP cell, or the '
                         'IBM_QUANTUM_CRN environment variable.')
     elif not crn.startswith('crn:'):
         problems.append('CRN should start with "crn:". Copy it from the Instances '

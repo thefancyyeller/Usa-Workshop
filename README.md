@@ -13,7 +13,7 @@ of inactivity, and nothing you type is saved to this repository or visible to ot
 ```
 workshop.ipynb              the notebook attendees run
 workshop/
-  session.py                the setup cell's backend picker
+  session.py                remembers the backend the setup cell chose
   runner.py                 connects and runs circuits
   examples/
     coin_flips.py           Example 1 — one qubit in superposition
@@ -27,16 +27,21 @@ runtime.txt                 Python version for Binder
 
 One setup cell, then everything else just runs:
 
-1. Run **SETUP**. A small form appears: pick **Local simulator** or **IBM Quantum**.
-2. On simulator, nothing to fill in — it is connected the moment the cell runs.
-   On real hardware, paste your API key and CRN and click **Connect**.
-   The key field is masked, so this is safe to do on a projector.
-3. Credentials are validated at that click. A wrong-length key or a malformed CRN
-   is reported right there, not three cells later.
+1. Edit the variables at the top of the **SETUP** cell:
+
+   ```python
+   USE_SIMULATOR = True   # False to use your real IBM Quantum instance
+   API_KEY = ""           # only needed when USE_SIMULATOR = False
+   CRN = ""
+   ```
+
+2. Run that cell. For the simulator there is nothing to fill in at all.
+3. Credentials are validated right there. A wrong-length key or a malformed CRN
+   is reported in that cell, not three cells later — and a failed setup leaves no
+   active backend, so the examples never quietly run somewhere you did not intend.
 4. Run any example. They take no arguments and use whichever backend is active.
 
-To switch backends mid-session, re-run the SETUP cell, or call `use_simulator()`
-or `connect(api_key, crn)` directly.
+To switch backends mid-session, change the variables and run the setup cell again.
 
 Each example is a self-contained module with the same shape:
 
@@ -96,7 +101,7 @@ Binder builds the image from two files in the repo root:
 
 | File | Purpose |
 | --- | --- |
-| `requirements.txt` | Python packages, pinned so every attendee gets the same versions (`ipywidgets` powers the setup form) |
+| `requirements.txt` | Python packages, pinned so every attendee gets the same versions |
 | `runtime.txt` | Python version (`python-3.11`) — Qiskit 2.x requires 3.10+ |
 
 If you change either file, pre-build again before the event.
